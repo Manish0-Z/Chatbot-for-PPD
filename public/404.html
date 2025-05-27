@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MOM - Page Not Found</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/css/login.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      .error-container {
+        text-align: center;
+        padding: 5rem 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      
+      .error-code {
+        font-size: 8rem;
+        font-weight: 700;
+        color: var(--primary-light);
+        line-height: 1;
+        margin-bottom: 1rem;
+      }
+      
+      .error-message {
+        font-size: 2rem;
+        color: var(--text-dark);
+        margin-bottom: 2rem;
+      }
+      
+      .error-description {
+        font-size: 1.1rem;
+        color: var(--text-light);
+        margin-bottom: 2rem;
+      }
+      
+      .error-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 3rem;
+      }
+      
+      .cta-button {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      .primary-button {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      .secondary-button {
+        background-color: var(--background-tint);
+        color: var(--text-dark);
+        border: 1px solid var(--border-light);
+      }
+      
+      .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="header-container">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-heart"></i>
+          </div>
+          <div class="logo-text">MOM</div>
+        </div>
+        <div class="nav-links" style="margin-left: auto; margin-right: 20px; display: flex; align-items: center;">
+          <div><a href="/" style="margin-right: 15px; text-decoration: none; color: var(--text-dark);">Home</a></div>
+          <div class="auth-section" style="display: flex; align-items: center;">
+            <a href="/login" class="login-btn" style="padding: 8px 16px; margin-right: 10px; border-radius: 5px; color: var(--primary-color); border: 1px solid var(--primary-color); text-decoration: none;">Login</a>
+            <a href="/signup" class="signup-btn" style="padding: 8px 16px; border-radius: 5px; background-color: var(--primary-color); color: white; text-decoration: none;">Sign Up</a>
+            <div class="profile-pic" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; margin-left: 15px; display: none; cursor: pointer; background-color: var(--primary-color);">
+              <!-- Profile content will be inserted by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="header-bubbles">
+        <div
+          class="bubble"
+          style="width: 30px; height: 30px; left: 10%; animation-duration: 12s"
+        ></div>
+        <div
+          class="bubble"
+          style="
+            width: 20px;
+            height: 20px;
+            left: 20%;
+            animation-duration: 15s;
+            animation-delay: 2s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            width: 25px;
+            height: 25px;
+            left: 40%;
+            animation-duration: 18s;
+            animation-delay: 1s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            width: 35px;
+            height: 35px;
+            left: 65%;
+            animation-duration: 14s;
+            animation-delay: 3s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            width: 22px;
+            height: 22px;
+            left: 85%;
+            animation-duration: 16s;
+            animation-delay: 4s;
+          "
+        ></div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <div class="error-container">
+        <div class="error-code">404</div>
+        <h1 class="error-message">Page Not Found</h1>
+        <p class="error-description">
+          The page you are looking for might have been removed, 
+          had its name changed, or is temporarily unavailable.
+        </p>
+        <div class="error-actions">
+          <a href="/" class="cta-button primary-button">
+            <i class="fas fa-home"></i> Back to Home
+          </a>
+          <a href="/" class="cta-button secondary-button">
+            <i class="fas fa-comments"></i> Back to Homepage
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-content">
+        <div class="footer-about">
+          <h3>MOM</h3>
+          <p>
+            We're dedicated to supporting new parents through their postpartum
+            journey with compassion, evidence-based information, and
+            personalized guidance.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link" aria-label="Facebook"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a href="#" class="social-link" aria-label="Twitter"
+              ><i class="fab fa-twitter"></i
+            ></a>
+            <a href="#" class="social-link" aria-label="Instagram"
+              ><i class="fab fa-instagram"></i
+            ></a>
+            <a href="#" class="social-link" aria-label="Pinterest"
+              ><i class="fab fa-pinterest-p"></i
+            ></a>
+          </div>
+        </div>
+        <div class="footer-newsletter">
+          <h4>Stay Updated</h4>
+          <p>Receive news and updates about maternal health and wellness.</p>
+          <form class="newsletter-form">
+            <input type="email" placeholder="Your email address" required />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-copyright">
+        <p>&copy; 2024 MOM. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+  </body>
+</html> 
