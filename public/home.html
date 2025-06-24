@@ -3,278 +3,434 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MOM - Postpartum Care Platform</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="/css/login.css" />
+    <title>MOM - Your Postpartum Care Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/index.css">
     <style>
-      /* Additional styles for home page */
-      .hero-section {
-        text-align: center;
-        padding: 3rem 1rem;
-        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+      :root {
+        --primary-color: #ff9ec7;
+        --primary-dark: #ff7eb9;
+        --primary-light: #ffaed0;
+        --text-dark: #333333;
+        --text-light: #666666;
+        --background-light: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', sans-serif;
+      }
+
+      body {
+        background-color: #F5F5F5;
+        color: var(--text-dark);
+        line-height: 1.6;
+      }
+
+      /* Hero Section */
+      .hero {
+        background: #ff9ec7;
         color: white;
-        border-radius: 12px;
-        margin-bottom: 2rem;
-      }
-      
-      .hero-section h1 {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-      }
-      
-      .hero-section p {
-        font-size: 1.2rem;
-        max-width: 800px;
-        margin: 0 auto 2rem;
-        opacity: 0.9;
-      }
-      
-      .cta-button {
-        display: inline-block;
-        background-color: white;
-        color: var(--primary-color);
-        font-weight: 600;
-        padding: 0.8rem 2rem;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: var(--box-shadow);
-      }
-      
-      .cta-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      }
-      
-      .features-section {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2rem;
-        margin-bottom: 3rem;
-      }
-      
-      .feature-card {
-        background-color: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: var(--box-shadow);
         text-align: center;
+        padding: 60px 20px;
+        margin: 25px auto;
+        max-width: 1000px;
+        border-radius: 10px;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto 25px;
+      }
+
+      .chat-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 30px;
+        background-color: white;
+        color: #ff7eb9;
+        border: none;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
       }
       
+      .chat-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .chat-btn i {
+        font-size: 1.2rem;
+      }
+
+
+      /* Features */
+      .features {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 0 20px;
+        flex-wrap: wrap;
+      }
+
+      .feature-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px 20px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        width: 300px;
+      }
+
       .feature-icon {
-        width: 60px;
-        height: 60px;
-        background-color: var(--primary-light);
-        color: var(--primary-color);
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
+        background-color: #ffebf3;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 1.5rem;
+        margin: 0 auto 20px;
       }
-      
+
+      .feature-icon i {
+        color: #ff7eb9;
+        font-size: 1.7rem;
+      }
+
       .feature-card h3 {
-        margin-bottom: 1rem;
-        color: var(--text-dark);
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: #333;
       }
-      
+
       .feature-card p {
-        color: var(--text-light);
-        font-size: 0.95rem;
+        color: #666;
+        font-size: 0.9rem;
       }
-      
+
+      /* Footer */
+      footer {
+        background-color: white;
+        color: #666;
+        padding: 50px 20px 20px;
+        margin-top: 30px;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto 30px;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .footer-about {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .footer-about h3 {
+        color: #ff9ec7;
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      .footer-about p {
+        margin-bottom: 20px;
+        line-height: 1.7;
+        color: #666;
+      }
+
+      .footer-social-links {
+        display: flex;
+        gap: 15px;
+      }
+
+      .footer-social-links .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #f5f5f5;
+        color: #666;
+        transition: all 0.3s ease;
+      }
+
+      .footer-social-links .social-link:hover {
+        background-color: #ff9ec7;
+        color: white;
+      }
+
+      .footer-newsletter {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .footer-newsletter h4 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: #333;
+      }
+
+      .footer-newsletter p {
+        margin-bottom: 20px;
+        color: #666;
+      }
+
+      .newsletter-form {
+        display: flex;
+        max-width: 400px;
+      }
+
+      .newsletter-form input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px 0 0 4px;
+        font-size: 0.9rem;
+      }
+
+      .newsletter-form button {
+        padding: 10px 20px;
+        background-color: #ff9ec7;
+        color: white;
+        border: none;
+        border-radius: 0 4px 4px 0;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .newsletter-form button:hover {
+        background-color: #ff7eb9;
+      }
+
+      .footer-copyright {
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+        text-align: center;
+        color: #999;
+        font-size: 0.9rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* Loading Overlay */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        display: none;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Responsive Design */
       @media (max-width: 768px) {
-        .features-section {
-          grid-template-columns: 1fr;
-        }
-        
-        .hero-section h1 {
+        .hero h1 {
           font-size: 2rem;
         }
-      }
-      
-      .auth-buttons {
-        display: flex;
-        gap: 1rem;
-      }
-      
-      .user-menu {
-        display: none;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      
-      .user-avatar {
-        width: 40px;
-        height: 40px;
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
       }
     </style>
   </head>
   <body>
-    <!-- Header -->
-    <header style="background-color: var(--primary-color); color: white;">
-      <div class="header-container">
-        <div class="logo">
-          <div class="logo-icon">
-            <i class="fas fa-heart"></i>
-          </div>
-          <div class="logo-text">MOM</div>
+    <nav class="home-nav">
+      <a href="/" class="logo home-logo">
+        <div class="logo-circle">
+          <div class="fas fa-heart"></div>
         </div>
-        <div class="nav-links" style="margin-left: auto; margin-right: 20px; display: flex; align-items: center;">
-          <div><a href="/" class="active" style="margin-right: 15px; text-decoration: none; color: white;">Home</a></div>
-          <div class="auth-section" style="display: flex; align-items: center;">
-            <a href="/login" class="login-btn" style="padding: 8px 16px; margin-right: 10px; border-radius: 5px; color: white; border: 1px solid white; text-decoration: none;">Login</a>
-            <a href="/signup" class="signup-btn" style="padding: 8px 16px; border-radius: 5px; background-color: white; color: var(--primary-color); text-decoration: none;">Sign Up</a>
-            <div class="profile-pic" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; margin-left: 15px; display: none; cursor: pointer; background-color: white;">
-              <!-- Profile content will be inserted by JavaScript -->
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="header-bubbles">
-        <div
-          class="bubble"
-          style="width: 30px; height: 30px; left: 10%; animation-duration: 12s"
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 20px;
-            height: 20px;
-            left: 20%;
-            animation-duration: 15s;
-            animation-delay: 2s;
-          "
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 25px;
-            height: 25px;
-            left: 40%;
-            animation-duration: 18s;
-            animation-delay: 1s;
-          "
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 35px;
-            height: 35px;
-            left: 65%;
-            animation-duration: 14s;
-            animation-delay: 3s;
-          "
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 22px;
-            height: 22px;
-            left: 85%;
-            animation-duration: 16s;
-            animation-delay: 4s;
-          "
-        ></div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-      <section class="hero-section">
-        <h1>Supporting Your Postpartum Journey</h1>
-        <p>
-          Our AI-powered companion provides personalized support, 
-          resources, and guidance through every step of your 
-          postpartum experience.
-        </p>
-        <a href="/medical-assistant" class="cta-button" style="font-size: 1.2rem; padding: 1rem 2.5rem; background-color: var(--primary-color); color: white;">Start Chatting Now</a>
-      </section>
+        <div class="logo-text">MOM</div>
+      </a>
       
-      <section class="features-section">
+      <div class="nav-links">
+        <a href="/" class="active">Home</a>
+        <a href="/aboutus.html">About</a>
+        <div class="auth-buttons">
+          <a href="/login.html" class="login-btn">Login</a>
+          <a href="/signup.html" class="signup-btn">Sign Up</a>
+        </div>
+        <div class="profile-section">
+          <div class="profile-icon"></div>
+          <div class="profile-dropdown">
+            <button class="profile-dropdown-item" id="logoutBtn">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <h1>Supporting Your Postpartum Journey</h1>
+        <p>Our AI-powered companion provides personalized support and guidance through every step of your postpartum journey.</p>
+        <a href="/chat.html" class="chat-btn">
+          Start Chatting Now
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </section>
+
+      <section class="features">
         <div class="feature-card">
           <div class="feature-icon">
-            <i class="fas fa-comments"></i>
+            <i class="fas fa-robot"></i>
           </div>
           <h3>24/7 AI Support</h3>
-          <p>
-            Get answers to your postpartum questions anytime, 
-            day or night, with our intelligent assistant.
-          </p>
+          <p>Get answers to your postpartum questions anytime, day or night, with our intelligent assistant.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
-            <i class="fas fa-book-medical"></i>
+            <i class="fas fa-bell"></i>
           </div>
-          <h3>Evidence-Based Information</h3>
-          <p>
-            Access reliable, up-to-date information about 
-            postpartum recovery, baby care, and maternal wellness.
-          </p>
+          <h3>Self-Care Reminders</h3>
+          <p>Gentle reminders to eat, rest, hydrate, and take moments for yourself during recovery.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
-            <i class="fas fa-lock"></i>
+            <i class="fas fa-shield-alt"></i>
           </div>
           <h3>Private & Secure</h3>
-          <p>
-            Your information is protected with industry-standard 
-            security measures and remains completely private.
-          </p>
+          <p>Your information is protected with industry-standard security measures and remains completely private.</p>
         </div>
       </section>
     </main>
 
-    <!-- Footer -->
-    <!-- Footer -->
-    <footer style="background-color: var(--primary-color); color: white;">
+    <footer>
       <div class="footer-content">
         <div class="footer-about">
           <h3>MOM</h3>
-          <p>
-            We're dedicated to supporting new parents through their postpartum
-            journey with compassion, evidence-based information, and
-            personalized guidance.
-          </p>
-          <div class="social-links">
-            <a href="#" class="social-link" aria-label="Facebook" style="color: white;">
-              <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="#" class="social-link" aria-label="Linkedin" style="color: white;">
-              <i class="fab fa-linkedin-in"></i>
-            </a>
-            <a href="#" class="social-link" aria-label="Instagram" style="color: white;">
-              <i class="fab fa-instagram"></i>
-            </a>
+          <p>We're dedicated to supporting new parents through their postpartum journey with compassion, evidence-based information, and personalized guidance.</p>
+          <div class="footer-social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
         <div class="footer-newsletter">
           <h4>Stay Updated</h4>
-          <p>Receive news and updates about maternal health and wellness.</p>
+          <p>Subscribe to our newsletter to receive the latest postpartum care tips and resources.</p>
           <form class="newsletter-form">
-            <input type="email" placeholder="Your email address" required />
-            <button type="submit" style="background-color: white; color: var(--primary-color);">Subscribe</button>
+            <input type="email" placeholder="Your email address" required>
+            <button type="submit">Subscribe</button>
           </form>
         </div>
       </div>
       <div class="footer-copyright">
-        <p>&copy; 2024 MOM. All rights reserved.</p>
+        <p>&copy; 2024 MOM - Your Postpartum Care Companion. All rights reserved.</p>
       </div>
     </footer>
 
-    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const authButtons = document.querySelector('.auth-buttons');
+        const profileSection = document.querySelector('.profile-section');
+        const profileIcon = document.querySelector('.profile-icon');
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Function to get user initials
+        function getInitials(name) {
+          return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+        
+        // Function to update UI based on auth state
+        function updateUIForAuthState(user) {
+          if (user) {
+            // Hide auth buttons and show profile
+            authButtons.style.display = 'none';
+            profileSection.style.display = 'block';
+            
+            // Update profile icon with user initials
+            const initials = getInitials(user.name || user.email || 'User');
+            profileIcon.textContent = initials;
+          } else {
+            // Show auth buttons and hide profile
+            authButtons.style.display = 'flex';
+            profileSection.style.display = 'none';
+            profileDropdown.classList.remove('active');
+          }
+        }
+        
+        // Check authentication status on page load
+        function checkAuthStatus() {
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null');
+          
+          if (token && user) {
+            updateUIForAuthState(user);
+          } else {
+            updateUIForAuthState(null);
+          }
+        }
+
+        // Toggle dropdown when clicking profile icon
+        profileIcon.addEventListener('click', function(e) {
+          e.stopPropagation();
+          profileDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!profileSection.contains(e.target)) {
+            profileDropdown.classList.remove('active');
+          }
+        });
+
+        // Handle logout
+        logoutBtn.addEventListener('click', function() {
+          // Clear authentication data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('user');
+          
+          // Update UI
+          updateUIForAuthState(null);
+          
+          // Redirect to home page
+          window.location.reload();
+        });
+
+        // Initial check of auth status
+        checkAuthStatus();
+        });
+    </script>
   </body>
 </html>

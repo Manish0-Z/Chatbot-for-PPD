@@ -1,60 +1,41 @@
 import mongoose from 'mongoose';
-import { setUseMemoryStore } from '../models/User.js';
 
 const connectDB = async () => {
-  try {
-    // Construct MongoDB URI
-    const mongoUser = process.env.MONGO_USER || 'manishbaral';
-    const mongoPass = process.env.MONGO_PASS || '1dIc0odKBV7ab3vX';
-    const mongoCluster = process.env.MONGO_CLUSTER || 'cluster0.0hwxpms.mongodb.net';
-    const mongoUri = `mongodb+srv://${mongoUser}:${mongoPass}@${mongoCluster}/?retryWrites=true&w=majority&appName=Cluster0`;
+  // Fallback to a demo connection string if none is provided
+  if (!process.env.MONGO_URI) {
+    console.warn('MONGO_URI is not defined in your .env file. Using demo connection.');
+    // This is a placeholder and won't actually connect to a real database
+    process.env.MONGO_URI = 'mongodb://localhost:27017/momapp';
     
+    console.log('=================================================================');
+    console.log('WARNING: Using local MongoDB connection. Registration and login');
+    console.log('functionality will be limited. Please set up a proper MongoDB');
+    console.log('connection as described in MongoDB-Setup-Guide.md');
+    console.log('=================================================================');
+  }
+
+  try {
     console.log(`Attempting to connect to MongoDB...`);
     
-    // Connection options with pooling
-    const options = {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      family: 4, // Use IPv4, skip trying IPv6
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 2, // Maintain at least 2 socket connections
-      connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-    };
-    
-    // Connect to MongoDB
-    const conn = await mongoose.connect(mongoUri, options);
-    
-    // Setup MongoDB connection event listeners
-    mongoose.connection.on('connected', () => {
-      console.log(`MongoDB connected to: ${conn.connection.host}`);
     });
-    
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
-    });
-    
-    mongoose.connection.on('disconnected', () => {
-      console.warn('MongoDB disconnected. Attempting to reconnect...');
-    });
-    
-    // Handle application termination
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed due to app termination');
-      process.exit(0);
-    });
-    
+
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    setUseMemoryStore(false);
     return true;
-  } catch (err) {
-    console.error(`Error connecting to MongoDB: ${err.message}`);
-    console.warn('Falling back to in-memory data storage.');
-    setUseMemoryStore(true);
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    console.log('Please ensure your MONGO_URI in the .env file is correct and your current IP address is whitelisted in MongoDB Atlas.');
+    
+    // Don't exit the process, allow the app to run with limited functionality
+    console.log('=================================================================');
+    console.log('WARNING: Running with limited functionality. User registration');
+    console.log('and authentication features will not work properly.');
+    console.log('=================================================================');
+    
     return false;
   }
 };
 
-export default connectDB; 
+export default connectDB;

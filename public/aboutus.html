@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOM - About Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #ff9ec7;
+            --primary-dark: #ff7eb9;
+            --primary-light: #ffaed0;
+            --secondary-color: #64c4ed;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --text-lightest: #999999;
+            --background-light: #ffffff;
+            --background-off-white: #f9f9f9;
+            --background-tint: #f5f7fa;
+            --border-light: #e5e5e5;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196F3;
+            --box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.05);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-tint);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+            transition: color var(--transition-speed) ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        /* Header Styles */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .logo-circle i {
+            color: white;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .login-btn {
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1px solid var(--primary-dark);
+            color: var(--primary-dark);
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .signup-btn {
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            background: var(--primary-dark);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* User Profile */
+        .profile-section {
+            display: none;
+            position: relative;
+        }
+        
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        
+        .profile-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-width: 120px;
+            display: none;
+            z-index: 1000;
+            padding: 8px;
+        }
+        
+        .profile-dropdown.active {
+            display: block;
+        }
+        
+        .profile-dropdown-item {
+            width: 100%;
+            text-align: left;
+            padding: 8px 16px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            transition: opacity 0.2s ease;
+        }
+        
+        .profile-dropdown-item:hover {
+            opacity: 0.8;
+        }
+        
+        .profile-dropdown-item i {
+            font-size: 14px;
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Main Content Styles */
+        main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="2.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="90" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+            background-color: var(--background-light);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .about-text h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .about-text p {
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+
+        .sdg-images {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .sdg-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+            padding: 20px;
+            background-color: white;
+        }
+
+        .sdg-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .sdg-image {
+            width: 70%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Team Section Styles */
+        .team-section {
+            margin-bottom: 4rem;
+        }
+
+        .team-section h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 3rem;
+            font-size: 2rem;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .team-card {
+            background-color: var(--background-light);
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, var(--primary-light), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .mission-section {
+            background-color: var(--background-light);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        .mission-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .value-card {
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 12px;
+            background-color: var(--background-tint);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .value-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+        }
+
+        .value-card h3 {
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .value-card p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: white;
+            color: #666;
+            padding: 50px 20px 20px;
+            margin-top: 30px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 0;
+        }
+
+        .footer-about {
+            flex: 1;
+            min-width: 300px;
+            max-width: none;
+        }
+
+        .footer-about h3 {
+            color: #ff9ec7;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .footer-about p {
+            margin-bottom: 20px;
+            line-height: 1.7;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .footer-social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-social-links .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .footer-social-links .social-link:hover {
+            background-color: #ff9ec7;
+            color: white;
+            transform: none;
+        }
+
+        .footer-newsletter {
+            flex: 1;
+            min-width: 300px;
+            max-width: none;
+        }
+
+        .footer-newsletter h4 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .footer-newsletter p {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            max-width: 400px;
+            gap: 0;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 0.9rem;
+        }
+
+        .newsletter-form button {
+            padding: 10px 20px;
+            background-color: #ff9ec7;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .newsletter-form button:hover {
+            background-color: #ff7eb9;
+        }
+
+        .footer-copyright {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 0.9rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-buttons {
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                display: none;
+            }
+
+            .header-container {
+                padding: 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+
+            .about-content,
+            .mission-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-circle">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="logo-text">MOM</div>
+        </a>
+        
+        <div class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="aboutus.html" class="active">About</a>
+            <div class="auth-buttons">
+                <a href="login.html" class="login-btn">Login</a>
+                <a href="signup.html" class="signup-btn">Sign Up</a>
+            </div>
+            <div class="profile-section">
+                <div class="profile-icon"></div>
+                <div class="profile-dropdown">
+                    <button class="profile-dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero-section">
+            <h1>About MOM</h1>
+            <p>Your trusted companion for personalized postpartum care</p>
+        </section>
+
+        <!-- About Content -->
+        <section class="about-content">
+            <div class="about-text">
+                <h2>Our Story</h2>
+                <p>
+                    MOM was founded with a simple yet powerful mission: to ensure no mother 
+                    feels alone during her postpartum journey. We recognized that the 
+                    transition to motherhood, while beautiful, can also be overwhelming 
+                    and isolating.
+                </p>
+                <p>
+                    Our platform combines cutting-edge AI technology with evidence-based 
+                    maternal health practices to provide personalized, accessible support 
+                    24/7. We believe every mother deserves expert guidance, emotional 
+                    support, and reliable information during this crucial time.
+                </p>
+                <p>
+                    From physical recovery to emotional wellness, from newborn care to 
+                    self-care, MOM is here to guide, support, and empower mothers every 
+                    step of the way.
+                </p>
+            </div>
+            <div class="sdg-images">
+                <div class="sdg-item">
+                    <img src="./images/Sustainable_Development_Goal_03GoodHealth.svg.png" alt="SDG 3: Good Health and Well-being" class="sdg-image">
+                </div>
+                <div class="sdg-item">
+                    <img src="./images/Sustainable_Development_Goal_05GenderEquality.svg.png" alt="SDG 5: Gender Equality" class="sdg-image">
+                </div>
+                <div class="sdg-item">
+                    <img src="./images/E_SDG_goals_icons-individual-rgb-10.png" alt="SDG 10: Reduced Inequalities" class="sdg-image">
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission Section -->
+        <section class="mission-section">
+            <h2>Our Mission & Values</h2>
+            <p style="color: var(--text-light); margin-bottom: 2rem; line-height: 1.7;">
+                To empower every mother with the knowledge, support, and confidence she needs 
+                to thrive during her postpartum journey, creating a world where no mother 
+                feels alone or unprepared.
+            </p>
+            
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Compassion</h3>
+                    <p>We approach every interaction with empathy, understanding, and genuine care for mothers' well-being.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Safety First</h3>
+                    <p>All our guidance is based on current medical evidence and best practices in maternal health.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Community</h3>
+                    <p>We foster a supportive community where mothers can connect, share, and learn from each other.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section -->
+        <section class="team-section">
+            <h2>Meet Our Team</h2>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-name">Kunal Khadka</div>
+                </div>
+                <div class="team-card">
+                    <div class="team-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-name">Nirdosh Khadka</div>
+                </div>
+                <div class="team-card">
+                    <div class="team-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-name">Bishesh Waiba</div>
+                </div>
+                <div class="team-card">
+                    <div class="team-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-name">Manish Baral</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-about">
+                <h3>MOM</h3>
+                <p>We're dedicated to supporting new parents through their postpartum journey with compassion, evidence-based information, and personalized guidance.</p>
+            </div>
+            <div class="footer-newsletter">
+                <h4>Stay Updated</h4>
+                <p>Receive news and updates about maternal health and wellness.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your email address" aria-label="Email for newsletter" required />
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <p>&copy; 2025 MOM. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize auth functionality
+        setupEventListeners();
+        checkAuthStatus();
+      });
+    </script>
+</body>
+</html>

@@ -1,227 +1,252 @@
 import express from 'express';
-import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
+import { spawn } from 'child_process';
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Track conversation session IDs
-const sessions = {};
+// Directory to store session data
+const TEMP_DIR = path.join(__dirname, '..', 'temp');
 
-// Direct method to get chatbot response using Python script
-const getChatbotResponse = async (message, sessionId) => {
-  return new Promise((resolve, reject) => {
+// Create temp directory if it doesn't exist
+if (!fs.existsSync(TEMP_DIR)) {
+    fs.mkdirSync(TEMP_DIR, { recursive: true });
+}
+
+// Flag to use Python Gemini chatbot - Set to true to use the Python implementation
+const USE_PYTHON_CHATBOT = true;
+
+// Function to get the session file path
+function getSessionFilePath(sessionId) {
+    return path.join(TEMP_DIR, `state_${sessionId}.json`);
+}
+
+// Route to get initial greeting
+router.get('/greeting', async (req, res) => {
     try {
-      // Create temp directory if it doesn't exist
-      const tempDir = path.join(__dirname, '..', 'temp');
-      if (!fs.existsSync(tempDir)) {
-        try {
-          fs.mkdirSync(tempDir, { recursive: true, mode: 0o755 });
-          console.log(`[DEBUG] Created temp directory: ${tempDir}`);
-        } catch (err) {
-          console.error(`[ERROR] Failed to create temp directory: ${err.message}`);
-        }
-      }
-      
-      // Create input and output files for the chatbot
-      const inputFile = path.join(tempDir, `input_${sessionId}.txt`);
-      const outputFile = path.join(tempDir, `output_${sessionId}.txt`);
-      
-      // Write the user message to the input file
-      fs.writeFileSync(inputFile, message);
-      
-      // Log the session ID being passed
-      console.log(`[DEBUG] Processing message for session ID: ${sessionId}`);
-      console.log(`[DEBUG] Message: "${message}"`);
-      
-      // Convert Windows backslashes to forward slashes for Python
-      const chatbotPath = path.join(__dirname, '..', 'chatbot', 'chatbot.py');
-      console.log(`[DEBUG] Python script path: ${chatbotPath}`);
-      
-      // Create a session state file to persist conversation state
-      const stateFile = path.join(tempDir, `state_${sessionId}.json`);
-      if (!fs.existsSync(stateFile)) {
-        fs.writeFileSync(stateFile, JSON.stringify({
-          id: sessionId,
-          createdAt: new Date().toISOString(),
-          step: 'greeting',
-          name: null,
-          age: null,
-          problem: null,
-          symptoms: null,
-          details: null,
-          responses: {}
-        }));
-        console.log(`[DEBUG] Created new state file for session: ${sessionId}`);
-      }
-      
-      // Execute the python chatbot script
-      const pythonProcess = spawn('python', [
-        chatbotPath,
-        '--input', inputFile,
-        '--output', outputFile,
-        '--user', sessionId,
-        '--debug'
-      ]);
-      
-      pythonProcess.on('error', (error) => {
-        console.error(`[ERROR] Failed to start Python process: ${error.message}`);
-        reject(new Error(`Failed to start Python process: ${error.message}`));
-      });
-      
-      let errorData = '';
-      
-      // Collect stderr for debugging
-      pythonProcess.stderr.on('data', (data) => {
-        errorData += data.toString();
-        console.log(`[DEBUG] Python stderr: ${data.toString()}`);
-      });
-      
-      pythonProcess.on('close', (code) => {
-        console.log(`[DEBUG] Python process exited with code ${code}`);
+        const sessionId = uuidv4();
+        console.log(`Generated new session ID for greeting: ${sessionId}`);
         
-        if (code !== 0) {
-          console.error(`[ERROR] Python process exited with code ${code}`);
-          console.error(`[ERROR] Error output: ${errorData}`);
-          reject(new Error(`Python process exited with code ${code}`));
-          return;
-        }
-        
-        // Read the output file
-        try {
-          if (fs.existsSync(outputFile)) {
-            const response = fs.readFileSync(outputFile, 'utf-8');
-            console.log(`[DEBUG] Response from chatbot: "${response.substring(0, 100)}..."`);
-            
-            // Clean up temp files
+        if (USE_PYTHON_CHATBOT) {
             try {
-              fs.unlinkSync(inputFile);
-              fs.unlinkSync(outputFile);
-            } catch (err) {
-              console.log(`[DEBUG] Error cleaning up temp files: ${err.message}`);
+                // Path to Python script
+                const pythonScript = path.join(__dirname, '..', 'chatbot', 'chatbot.py');
+                
+                // Create a promise to handle the Python process
+                const pythonResponse = new Promise((resolve, reject) => {
+                    let output = '';
+                    let error = '';
+                    
+                    // Spawn Python process with --first-run flag
+                    const pythonProcess = spawn('python', [
+                        pythonScript,
+                        '--first-run',
+                        '--user', sessionId
+                    ]);
+                    
+                    // Collect output
+                    pythonProcess.stdout.on('data', (data) => {
+                        output += data.toString();
+                    });
+                    
+                    // Collect errors
+                    pythonProcess.stderr.on('data', (data) => {
+                        error += data.toString();
+                    });
+                    
+                    // Handle process completion
+                    pythonProcess.on('close', (code) => {
+                        if (code === 0) {
+                            resolve(output.trim());
+                        } else {
+                            console.error(`Python process error: ${error}`);
+                            reject(new Error('Python process failed'));
+                        }
+                    });
+                    
+                    // Handle process errors
+                    pythonProcess.on('error', (err) => {
+                        console.error(`Failed to start Python process: ${err}`);
+                        reject(err);
+                    });
+                    
+                    // Set timeout
+                    setTimeout(() => {
+                        pythonProcess.kill();
+                        reject(new Error('Python process timed out'));
+                    }, 5000); // 5 second timeout
+                });
+                
+                // Wait for Python response
+                const response = await pythonResponse;
+                
+                // Send response
+                res.json({ 
+                    sessionId, 
+                    response: response
+                });
+                
+            } catch (pythonError) {
+                console.error('Python chatbot failed:', pythonError);
+                res.status(500).json({ 
+                    error: 'An error occurred while getting the greeting.',
+                    message: "I'm sorry, I couldn't initialize the chat. Please try again."
+                });
             }
-            
-            resolve(response);
-          } else {
-            console.error(`[ERROR] Output file not found: ${outputFile}`);
-            reject(new Error('Output file not found'));
-          }
-        } catch (err) {
-          console.error(`[ERROR] Error reading output file: ${err.message}`);
-          reject(err);
+        } else {
+            res.status(500).json({ 
+                error: 'Chatbot service is currently unavailable.',
+                message: "I'm sorry, the chatbot service is currently unavailable. Please try again later."
+            });
         }
-      });
     } catch (error) {
-      console.error('[ERROR] Error in getChatbotResponse:', error);
-      reject(error);
+        console.error('Error getting greeting:', error);
+        res.status(500).json({ 
+            error: 'An error occurred while getting the greeting.',
+            message: "I'm sorry, I couldn't initialize the chat. Please try again."
+        });
     }
-  });
-};
-
-// Handle chatbot messages
-router.post('/message', async (req, res) => {
-  try {
-    const { message } = req.body;
-    
-    if (!message) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Message is required' 
-      });
-    }
-    
-    // Get or create session ID from header or client storage
-    let sessionId = req.headers['x-session-id'];
-    console.log(`[DEBUG] Raw session ID from request headers: '${sessionId}'`);
-    
-    // If no session ID or it's 'null' (from localStorage), create a new one
-    if (!sessionId || sessionId === 'null' || sessionId === 'undefined') {
-      sessionId = uuidv4();
-      console.log(`[DEBUG] Created new session ID: '${sessionId}'`);
-      
-      // Initialize the session
-      sessions[sessionId] = {
-        id: sessionId,
-        createdAt: new Date(),
-        messages: []
-      };
-    } else {
-      console.log(`[DEBUG] Using existing session ID: '${sessionId}'`);
-      console.log(`[DEBUG] Session exists in memory: ${!!sessions[sessionId]}`);
-      
-      // Ensure the session exists
-      if (!sessions[sessionId]) {
-        console.log(`[DEBUG] Session not found in memory, creating new session data for ID: '${sessionId}'`);
-        sessions[sessionId] = {
-          id: sessionId,
-          createdAt: new Date(),
-          messages: []
-        };
-      }
-    }
-    
-    // Special handling for "New case" message
-    if (message.toLowerCase() === 'new case') {
-      // Create a new session ID
-      const newSessionId = uuidv4();
-      console.log(`[DEBUG] Creating new case with session ID: '${newSessionId}'`);
-      
-      // Initialize the new session
-      sessions[newSessionId] = {
-        id: newSessionId,
-        createdAt: new Date(),
-        messages: []
-      };
-      
-      // Return a welcome message for the new case
-      res.json({
-        success: true,
-        response: "Great! Let's start a new patient record. What's your name?",
-        sessionId: newSessionId
-      });
-      return;
-    }
-    
-    // Add message to session history
-    sessions[sessionId].messages.push({
-      sender: 'user',
-      text: message,
-      timestamp: new Date()
-    });
-    
-    // Get response from chatbot with session ID for conversation tracking
-    console.log(`[DEBUG] Sending to Python with session ID: '${sessionId}'`);
-    const response = await getChatbotResponse(message, sessionId);
-    
-    // Add bot response to session history
-    sessions[sessionId].messages.push({
-      sender: 'bot',
-      text: response,
-      timestamp: new Date()
-    });
-    
-    // Log the total messages in this session
-    console.log(`[DEBUG] Session '${sessionId}' now has ${sessions[sessionId].messages.length} messages`);
-    
-    res.setHeader('Content-Type', 'application/json');
-    const responseData = { 
-      success: true, 
-      response,
-      sessionId
-    };
-    console.log(`[DEBUG] Sending response with sessionId: '${sessionId}'`);
-    res.json(responseData);
-  } catch (error) {
-    console.error('[DEBUG] Chatbot API error:', error.message);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Sorry, I encountered an error processing your message. Please try again' 
-    });
-  }
 });
 
-export default router;
+// Route to handle chat messages
+router.post('/message', async (req, res) => {
+    try {
+        const { message } = req.body;
+        let sessionId = req.headers['x-session-id'];
+        
+        console.log(`==== PROCESSING MESSAGE REQUEST ====`);
+        console.log(`Session ID: ${sessionId}`);
+        console.log(`Message: "${message}"`);
+        
+        // Generate new session ID if not provided
+        if (!sessionId) {
+            sessionId = uuidv4();
+            console.log(`Generated new session ID: ${sessionId}`);
+        }
+        
+        // Use Python Gemini chatbot
+        if (USE_PYTHON_CHATBOT) {
+            try {
+                // Path to Python script
+                const pythonScript = path.join(__dirname, '..', 'chatbot', 'chatbot.py');
+                console.log(`Python script path: ${pythonScript}`);
+                
+                // Save message to temporary file
+                const messageFile = path.join(TEMP_DIR, `message_${sessionId}.txt`);
+                fs.writeFileSync(messageFile, message, 'utf8');
+                console.log(`Saved message to file: ${messageFile}`);
+                
+                // Log file contents for verification
+                const fileContents = fs.readFileSync(messageFile, 'utf8');
+                console.log(`Verified file contents: "${fileContents}"`);
+                
+                console.log(`Launching Python process...`);
+                
+                // Create a promise to handle the Python process
+                const pythonResponse = new Promise((resolve, reject) => {
+                    let output = '';
+                    let error = '';
+                    
+                    // Build command with arguments for logging
+                    const args = [
+                        pythonScript,
+                        '--user', sessionId,
+                        '--message-file', messageFile
+                    ];
+                    console.log(`Command: python ${args.join(' ')}`);
+                    
+                    // Spawn Python process
+                    const pythonProcess = spawn('python', args);
+                    
+                    // Collect output
+                    pythonProcess.stdout.on('data', (data) => {
+                        const chunk = data.toString();
+                        output += chunk;
+                        console.log(`Python stdout: "${chunk}"`);
+                    });
+                    
+                    // Collect errors
+                    pythonProcess.stderr.on('data', (data) => {
+                        const chunk = data.toString();
+                        error += chunk;
+                        console.error(`Python stderr: "${chunk}"`);
+                    });
+                    
+                    // Handle process completion
+                    pythonProcess.on('close', (code) => {
+                        console.log(`Python process exited with code ${code}`);
+                        
+                        // Clean up message file
+                        try {
+                            fs.unlinkSync(messageFile);
+                            console.log(`Removed message file: ${messageFile}`);
+                        } catch (err) {
+                            console.error(`Error deleting message file: ${err}`);
+                        }
+                        
+                        if (code === 0) {
+                            if (!output.trim()) {
+                                console.log(`Warning: Python process returned empty output`);
+                                resolve("I'm here to help. What would you like to know?");
+                            } else {
+                                resolve(output.trim());
+                            }
+                        } else {
+                            console.error(`Python process error (code ${code}): ${error}`);
+                            reject(new Error(`Python process failed with code ${code}`));
+                        }
+                    });
+                    
+                    // Handle process errors
+                    pythonProcess.on('error', (err) => {
+                        console.error(`Failed to start Python process: ${err}`);
+                        reject(err);
+                    });
+                    
+                    // Set timeout
+                    setTimeout(() => {
+                        pythonProcess.kill();
+                        console.error(`Python process timed out after 5 seconds`);
+                        reject(new Error('Python process timed out'));
+                    }, 5000); // 5 second timeout
+                });
+                
+                // Wait for Python response
+                const response = await pythonResponse;
+                console.log(`Python response received: "${response.substring(0, 100)}${response.length > 100 ? '...' : ''}"`);
+                
+                // Send response
+                console.log(`Sending response to client for session ${sessionId}`);
+                res.json({ 
+                    sessionId, 
+                    response: response
+                });
+                
+            } catch (pythonError) {
+                console.error(`Python chatbot failed: ${pythonError.stack || pythonError}`);
+                res.json({ 
+                    sessionId,
+                    response: "I'm sorry, I couldn't process your request. Could you try again?"
+                });
+            }
+        } else {
+            console.log(`Python chatbot is disabled`);
+            res.json({ 
+                sessionId,
+                response: "I'm sorry, the chatbot service is currently unavailable. Please try again later."
+            });
+        }
+    } catch (error) {
+        console.error(`Error processing message: ${error.stack || error}`);
+        res.json({ 
+            error: 'An error occurred while processing your message.',
+            response: "I'm sorry, I couldn't process your request. Please try again."
+        });
+    }
+});
+
+export default router; 

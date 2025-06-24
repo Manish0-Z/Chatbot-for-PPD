@@ -3,290 +3,529 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MOM - Sign Up</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="/css/login.css" />
+    <title>MOM - Create Your Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Inter', sans-serif;
+      }
+
+      body {
+        background-color: #f8f9fe;
+        color: #333;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 50px;
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #ff7eb9;
+      }
+
+      .logo-circle {
+        width: 40px;
+        height: 40px;
+        background-color: #ff9ec7;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 10px;
+      }
+
+      .logo-circle i {
+        color: white;
+        font-size: 20px;
+      }
+
+      .logo-text {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #ff9ec7;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        flex: 1;
+      }
+
+      .signup-container {
+        display: flex;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        min-height: 600px;
+      }
+
+      .signup-form {
+        flex: 1;
+        padding: 3rem;
+      }
+
+      .signup-form h1 {
+        color: #333;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        flex: 1;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .input-group {
+        position: relative;
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.8rem 1rem 0.8rem 3rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #ff9ec7;
+      }
+
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .terms-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+      }
+
+      .privacy-link {
+        color: #ff9ec7;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .signup-btn {
+        width: 100%;
+        padding: 1rem;
+        background: #ff9ec7;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .signup-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .signup-btn i {
+        font-size: 0.9rem;
+      }
+
+      .features-panel {
+        flex: 1;
+        padding: 3rem;
+        background: #ff9ec7;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .features-panel h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .features-subtitle {
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+
+      .features-list {
+        list-style: none;
+      }
+
+      .features-list li {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .features-list li::before {
+        content: "✓";
+        font-weight: bold;
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #666;
+      }
+
+      .login-link a {
+        color: #ff9ec7;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .error-message {
+        color: #e74c3c;
+        margin-top: 1rem;
+        text-align: center;
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .signup-container {
+          flex-direction: column;
+        }
+        
+        .form-row {
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .signup-form,
+        .features-panel {
+          padding: 2rem;
+        }
+        
+        .navbar {
+          padding: 15px 20px;
+          flex-direction: column;
+          gap: 15px;
+        }
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .spinner {
+        animation: spin 1s linear infinite;
       }
     </style>
   </head>
   <body>
-    <!-- Header -->
-    <header>
-      <div class="header-container">
-        <div class="logo">
-          <div class="logo-icon">
-            <i class="fas fa-heart"></i>
-          </div>
-          <div class="logo-text">MOM</div>
-          <span class="logo-tagline">Your Postpartum Care Companion</span>
+    <nav class="navbar">
+      <a href="home.html" class="logo">
+        <div class="logo-circle">
+          <i class="fas fa-heart"></i>
         </div>
-        <ul class="nav-links" style="margin-left: auto; margin-right: 20px">
-          <li><a href="/">Home</a></li>
-        </ul>
+        <span class="logo-text">MOM</span>
+      </a>
+      <div class="nav-links">
+        <a href="home.html">Home</a>
+        <a href="aboutus.html">About</a>
       </div>
-      <div class="header-bubbles">
-        <div
-          class="bubble"
-          style="width: 30px; height: 30px; left: 10%; animation-duration: 12s"
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 20px;
-            height: 20px;
-            left: 20%;
-            animation-duration: 15s;
-            animation-delay: 2s;
-          "
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 25px;
-            height: 25px;
-            left: 40%;
-            animation-duration: 18s;
-            animation-delay: 1s;
-          "
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 35px;
-            height: 35px;
-            left: 65%;
-            animation-duration: 14s;
-            animation-delay: 3s;
-          "
-        ></div>
-        <div
-          class="bubble"
-          style="
-            width: 22px;
-            height: 22px;
-            left: 85%;
-            animation-duration: 16s;
-            animation-delay: 4s;
-          "
-        ></div>
-      </div>
-    </header>
+    </nav>
 
-    <!-- Main Content -->
-    <main>
-      <div class="auth-container">
-        <div class="auth-card" style="max-width: 500px;">
-          <div class="auth-header">
-            <h2>Create Your Account</h2>
-            <p>Join our community and get personalized support</p>
-          </div>
-          <div class="auth-form-container">
-            <form id="signup-form" class="auth-form">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                  <label for="firstName">First Name</label>
-                  <div class="input-with-icon">
-                    <i class="fas fa-user"></i>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      placeholder="First name"
-                      required
-                    />
-                  </div>
-                  <div class="error-message" id="firstName-error"></div>
-                </div>
-                <div class="form-group">
-                  <label for="lastName">Last Name</label>
-                  <div class="input-with-icon">
-                    <i class="fas fa-user"></i>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      placeholder="Last name"
-                      required
-                    />
-                  </div>
-                  <div class="error-message" id="lastName-error"></div>
-                </div>
-              </div>
-              
+    <main class="container">
+      <div class="signup-container">
+        <div class="signup-form">
+          <h1>Create Your Account</h1>
+          <p class="subtitle">Join our community of mothers and get personalized support</p>
+
+          <form id="signup-form">
+            <div class="form-row">
               <div class="form-group">
-                <label for="username">Username</label>
-                <div class="input-with-icon">
-                  <i class="fas fa-user-tag"></i>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Choose a username"
-                    required
-                  />
+                <label for="first-name">First Name</label>
+                <div class="input-group">
+                  <span class="input-icon"><i class="fas fa-user"></i></span>
+                  <input type="text" id="first-name" name="firstName" placeholder="Your first name" required>
                 </div>
-                <div class="error-message" id="username-error"></div>
               </div>
-              
+
               <div class="form-group">
-                <label for="email">Email</label>
-                <div class="input-with-icon">
-                  <i class="fas fa-envelope"></i>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Your email address"
-                    required
-                  />
-                </div>
-                <div class="error-message" id="email-error"></div>
-              </div>
-              
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                  <label for="password">Password</label>
-                  <div class="input-with-icon">
-                    <i class="fas fa-lock"></i>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      placeholder="Create a password"
-                      required
-                    />
-                  </div>
-                  <div class="error-message" id="password-error"></div>
-                </div>
-                <div class="form-group">
-                  <label for="confirmPassword">Confirm Password</label>
-                  <div class="input-with-icon">
-                    <i class="fas fa-lock"></i>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      placeholder="Confirm password"
-                      required
-                    />
-                  </div>
-                  <div class="error-message" id="confirmPassword-error"></div>
+                <label for="last-name">Last Name</label>
+                <div class="input-group">
+                  <span class="input-icon"><i class="fas fa-user"></i></span>
+                  <input type="text" id="last-name" name="lastName" placeholder="Your last name" required>
                 </div>
               </div>
-              
-              <div class="form-group">
-                <label for="phoneNumber">Phone Number (Optional)</label>
-                <div class="input-with-icon">
-                  <i class="fas fa-phone"></i>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    placeholder="Your phone number"
-                  />
-                </div>
-                <div class="error-message" id="phoneNumber-error"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <div class="input-group">
+                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                <input type="email" id="email" name="email" placeholder="Your email address" required>
               </div>
-              
-              <div class="form-options">
-                <div class="remember-me">
-                  <input type="checkbox" id="terms" name="terms" required />
-                  <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
-                </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-group">
+                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
               </div>
-              <div
-                class="error-message"
-                id="signup-error"
-                style="color: red; margin-top: 10px; font-size: 0.9rem"
-              ></div>
-              <button type="submit" class="auth-button">
-                <span>Create Account</span>
-                <i class="fas fa-arrow-right"></i>
-              </button>
-            </form>
-          </div>
-          <div class="auth-footer">
-            <p>Already have an account? <a href="/login">Sign In</a></p>
-          </div>
-        </div>
-        <div class="auth-info">
-          <div class="auth-info-content">
-            <h2>Your Postpartum Journey Matters</h2>
-            <p>
-              Join our community of mothers and get personalized support through
-              every step of your postpartum experience.
+            </div>
+
+            <div class="form-group">
+              <label for="confirm-password">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm your password" required>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <div class="terms-checkbox">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">I agree to the <a href="#" class="privacy-link">Terms & Privacy Policy</a></label>
+              </div>
+            </div>
+
+            <div id="error-message" class="error-message"></div>
+
+            <button type="submit" class="signup-btn" id="signup-btn">
+              <i class="fas fa-user-plus"></i>
+              Create Account
+            </button>
+
+            <p class="login-link">
+              Already have an account? <a href="login.html">Sign in</a>
             </p>
-            <ul class="benefits-list">
-              <li>
-                <i class="fas fa-check-circle"></i>
-                <span>24/7 access to personalized care guidance</span>
-              </li>
-              <li>
-                <i class="fas fa-check-circle"></i>
-                <span>Expert resources for maternal wellness</span>
-              </li>
-              <li>
-                <i class="fas fa-check-circle"></i>
-                <span>Supportive community of mothers</span>
-              </li>
-              <li>
-                <i class="fas fa-check-circle"></i>
-                <span>Track your postpartum recovery progress</span>
-              </li>
-            </ul>
-          </div>
+          </form>
+        </div>
+
+        <div class="features-panel">
+          <h2>Your Personal Postpartum Care Assistant</h2>
+          <p class="features-subtitle">Get the support and guidance you need during your postpartum journey</p>
+
+          <ul class="features-list">
+            <li>24/7 AI Support for your questions</li>
+            <li>Evidence-based information and resources</li>
+            <li>Personalized guidance for your recovery</li>
+            <li>Private and secure environment</li>
+            <li>Connect with postpartum specialists</li>
+          </ul>
         </div>
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer>
-      <div class="footer-content">
-        <div class="footer-about">
-          <h3>MOM</h3>
-          <p>
-            We're dedicated to supporting new parents through their postpartum
-            journey with compassion, evidence-based information, and
-            personalized guidance.
-          </p>
-          <div class="social-links">
-            <a href="#" class="social-link" aria-label="Facebook"
-              ><i class="fab fa-facebook-f"></i
-            ></a>
-            <a href="#" class="social-link" aria-label="Twitter"
-              ><i class="fab fa-twitter"></i
-            ></a>
-            <a href="#" class="social-link" aria-label="Instagram"
-              ><i class="fab fa-instagram"></i
-            ></a>
-            <a href="#" class="social-link" aria-label="Pinterest"
-              ><i class="fab fa-pinterest-p"></i
-            ></a>
-          </div>
-        </div>
-        <div class="footer-newsletter">
-          <h4>Stay Updated</h4>
-          <p>Receive news and updates about maternal health and wellness.</p>
-          <form class="newsletter-form">
-            <input type="email" placeholder="Your email address" required />
-            <button type="submit">Subscribe</button>
-          </form>
-        </div>
-      </div>
-      <div class="footer-copyright">
-        <p>&copy; 2024 MOM. All rights reserved.</p>
-      </div>
-    </footer>
-
-    <script src="/js/auth.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if user is already logged in
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+          // User is already logged in, redirect to home
+          window.location.href = 'home.html';
+          return;
+        }
+        
+        const signupForm = document.getElementById('signup-form');
+        const signupBtn = document.getElementById('signup-btn');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Function to show loading state
+        function showLoading() {
+          signupBtn.disabled = true;
+          signupBtn.innerHTML = '<i class="fas fa-spinner spinner"></i> Creating account...';
+        }
+        
+        // Function to hide loading state
+        function hideLoading() {
+          signupBtn.disabled = false;
+          signupBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        }
+        
+        // Function to show error
+        function showError(message) {
+          errorMessage.textContent = message;
+          errorMessage.style.display = 'block';
+        }
+        
+        // Function to hide error
+        function hideError() {
+          errorMessage.textContent = '';
+          errorMessage.style.display = 'none';
+        }
+        
+        signupForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          hideError();
+          
+          const firstName = document.getElementById('first-name').value;
+          const lastName = document.getElementById('last-name').value;
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirm-password').value;
+          const termsAccepted = document.getElementById('terms').checked;
+          
+          // Form validation
+          if (!firstName || !lastName) {
+            showError('Please enter your full name');
+            return;
+          }
+          
+          if (!email) {
+            showError('Please enter your email address');
+            return;
+          }
+          
+          // Email format validation
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            showError('Please enter a valid email address');
+            return;
+          }
+          
+          // Stricter domain validation
+          try {
+            const domainParts = email.split('@')[1].split('.');
+            const topLevelDomain = domainParts[domainParts.length - 1];
+            const domain = domainParts[0];
+            
+            // Check domain length - prevent short domains like "g.com"
+            if (domain.length < 3) {
+              showError('Please use a valid email with a proper domain name');
+              return;
+            }
+            
+            // Check top-level domain length
+            if (topLevelDomain.length < 2) {
+              showError('Please use a valid email address with proper domain');
+              return;
+            }
+          } catch (error) {
+            showError('Invalid email format');
+            return;
+          }
+          
+          if (password.length < 6) {
+            showError('Password must be at least 6 characters long');
+            return;
+          }
+          
+          if (password !== confirmPassword) {
+            showError('Passwords do not match');
+            return;
+          }
+          
+          if (!termsAccepted) {
+            showError('You must accept the terms and privacy policy');
+            return;
+          }
+          
+          showLoading();
+          
+          try {
+            const response = await fetch('/api/auth/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                name: `${firstName} ${lastName}`,
+                email,
+                password
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              // Show success message
+              const successMessage = data.message || 'Account created successfully! Please sign in with your credentials.';
+              errorMessage.textContent = successMessage;
+              errorMessage.style.color = '#4CAF50'; // Green color for success
+              errorMessage.style.display = 'block';
+              hideLoading();
+              
+              // Redirect to login page after a short delay
+              setTimeout(() => {
+                window.location.href = 'login.html';
+              }, 2000);
+            } else {
+              showError(data.message || 'Registration failed. Please try again.');
+              hideLoading();
+            }
+          } catch (error) {
+            console.error('Registration error:', error);
+            showError('An error occurred during registration. Please try again.');
+            hideLoading();
+          }
+        });
+      });
+    </script>
+    <script src="js/debug.js"></script>
   </body>
-</html> 
+</html>

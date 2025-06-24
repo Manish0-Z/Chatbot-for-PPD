@@ -1,51 +1,33 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-
-// Create a simple memory store for users
-export const memoryUsers = [];
-export let useMemoryStore = true; // Set to true by default
-
-// Check if we should use memory store instead of MongoDB
-export const setUseMemoryStore = (value) => {
-  useMemoryStore = value;
-  console.log(`Using ${useMemoryStore ? 'in-memory' : 'MongoDB'} user store`);
-};
+import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema({
-  firstName: {
+  name: {
     type: String,
-    required: true,
-    trim: true
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
+    required: [true, 'Please add a name'],
+    trim: true,
+    maxlength: [50, 'Name cannot be more than 50 characters']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Please add an email'],
     unique: true,
-    trim: true,
-    lowercase: true
+    match: [
+      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+      'Please add a valid email'
+    ]
   },
   password: {
     type: String,
-    required: true
+    required: [true, 'Please add a password'],
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false
   },
-  phoneNumber: {
+  role: {
     type: String,
-    trim: true
-  },
-  profilePicture: {
-    type: String,
-    default: '/images/profiles/default-profile.png'
+    enum: ['user', 'admin'],
+    default: 'user'
   },
   createdAt: {
     type: Date,
@@ -53,24 +35,25 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Pre-save hook to hash password
+// Encrypt password using bcrypt
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+  if (!this.isModified('password')) {
     next();
-  } catch (error) {
-    next(error);
   }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
-
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+// Sign JWT and return
+userSchema.methods.getSignedJwtToken = function() {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE
+  });
 };
 
-const User = mongoose.model('User', userSchema);
+// Match user entered password to hashed password in database
+userSchema.methods.matchPassword = async function(enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
-export default User; 
+export default mongoose.model('User', userSchema);

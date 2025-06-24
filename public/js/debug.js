@@ -126,4 +126,88 @@ document.addEventListener('DOMContentLoaded', () => {
     inputContainer.style.backgroundColor = 'transparent';
     inputContainer.style.borderTop = 'none';
   }
+});
+
+// Debug script to help troubleshoot authentication issues
+document.addEventListener('DOMContentLoaded', function() {
+  // Create debug panel
+  const debugPanel = document.createElement('div');
+  debugPanel.style.position = 'fixed';
+  debugPanel.style.bottom = '10px';
+  debugPanel.style.right = '10px';
+  debugPanel.style.padding = '10px';
+  debugPanel.style.background = 'rgba(0,0,0,0.8)';
+  debugPanel.style.color = 'white';
+  debugPanel.style.borderRadius = '5px';
+  debugPanel.style.fontSize = '12px';
+  debugPanel.style.maxWidth = '400px';
+  debugPanel.style.maxHeight = '200px';
+  debugPanel.style.overflow = 'auto';
+  debugPanel.style.zIndex = '9999';
+  debugPanel.style.fontFamily = 'monospace';
+  
+  // Add toggle button
+  const toggleButton = document.createElement('button');
+  toggleButton.textContent = 'Auth Debug';
+  toggleButton.style.position = 'fixed';
+  toggleButton.style.bottom = '10px';
+  toggleButton.style.right = '10px';
+  toggleButton.style.padding = '5px 10px';
+  toggleButton.style.background = '#ff9ec7';
+  toggleButton.style.color = 'white';
+  toggleButton.style.border = 'none';
+  toggleButton.style.borderRadius = '5px';
+  toggleButton.style.cursor = 'pointer';
+  toggleButton.style.zIndex = '10000';
+  
+  // Hide panel initially
+  debugPanel.style.display = 'none';
+  
+  // Toggle panel visibility
+  toggleButton.addEventListener('click', function() {
+    if (debugPanel.style.display === 'none') {
+      debugPanel.style.display = 'block';
+      updateDebugInfo();
+    } else {
+      debugPanel.style.display = 'none';
+    }
+  });
+  
+  // Function to update debug info
+  function updateDebugInfo() {
+    const localToken = localStorage.getItem('token');
+    const sessionToken = sessionStorage.getItem('token');
+    const localUser = localStorage.getItem('user');
+    const sessionUser = localStorage.getItem('user');
+    
+    let html = '<h3>Authentication Debug</h3>';
+    
+    // Local storage info
+    html += '<h4>localStorage</h4>';
+    html += `<p>Token: ${localToken ? 'Present (first 10 chars: ' + localToken.substring(0, 10) + '...)' : 'Not found'}</p>`;
+    html += `<p>User: ${localUser ? 'Present' : 'Not found'}</p>`;
+    if (localUser) {
+      try {
+        const userData = JSON.parse(localUser);
+        html += `<p>User data: ${JSON.stringify(userData, null, 2)}</p>`;
+      } catch (e) {
+        html += `<p>Error parsing user data: ${e.message}</p>`;
+      }
+    }
+    
+    // Session storage info
+    html += '<h4>sessionStorage</h4>';
+    html += `<p>Token: ${sessionToken ? 'Present (first 10 chars: ' + sessionToken.substring(0, 10) + '...)' : 'Not found'}</p>`;
+    html += `<p>User: ${sessionUser ? 'Present' : 'Not found'}</p>`;
+    
+    // Current page
+    html += '<h4>Page Info</h4>';
+    html += `<p>Current URL: ${window.location.href}</p>`;
+    
+    debugPanel.innerHTML = html;
+  }
+  
+  // Add elements to page
+  document.body.appendChild(debugPanel);
+  document.body.appendChild(toggleButton);
 }); 
