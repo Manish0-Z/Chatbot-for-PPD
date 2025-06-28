@@ -9,6 +9,7 @@ import requests
 import time
 import traceback
 from enum import Enum
+import re
 
 # Add the directory containing this file to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -27,15 +28,11 @@ if not os.path.exists(STATE_DIR):
 
 class ConversationState(Enum):
     GREETING = "GREETING"
+    PERMISSION_ASK = "PERMISSION_ASK"
     AWAITING_AGE = "AWAITING_AGE"
     AGE_VERIFICATION_FAILED = "AGE_VERIFICATION_FAILED"
-    AWAITING_BIRTH_TIMING = "AWAITING_BIRTH_TIMING"
     IN_PREGNANCY_INFO = "IN_PREGNANCY_INFO"
     SYMPTOMS_QUESTION = "SYMPTOMS_QUESTION"
-    EMOTIONAL_QUESTION = "EMOTIONAL_QUESTION"
-    MENTAL_QUESTION = "MENTAL_QUESTION"
-    SLEEP_QUESTION = "SLEEP_QUESTION"
-    PHYSICAL_QUESTION = "PHYSICAL_QUESTION"
     USER_LED = "USER_LED"
     SYMPTOMS_QUESTIONNAIRE = "SYMPTOMS_QUESTIONNAIRE"
 
@@ -104,7 +101,17 @@ class GeminiChatbot:
         current_state = self.user_states.get(user_id)
         
         if current_state == ConversationState.GREETING:
-            log_debug("State transition: GREETING -> AWAITING_AGE")
+            log_debug("State transition: GREETING -> PERMISSION_ASK")
+            self.user_states[user_id] = ConversationState.PERMISSION_ASK
+
+        elif current_state == ConversationState.PERMISSION_ASK:
+            # User is responding to permission request to ask questions
+            if message.lower() in ['yes', 'y', 'yeah', 'yep', 'sure', 'ok', 'okay', '1', '👍']:
+                log_debug("User consented to questions, transitioning to AWAITING_AGE")
+            else:
+                log_debug("User declined questions, but still going to AWAITING_AGE")
+                
+            # Regardless of yes/no answer, we proceed to AWAITING_AGE
             self.user_states[user_id] = ConversationState.AWAITING_AGE
 
         elif current_state == ConversationState.AWAITING_AGE or current_state == ConversationState.AGE_VERIFICATION_FAILED:
@@ -124,47 +131,19 @@ class GeminiChatbot:
                         log_debug("Age under 18, transitioning to AGE_VERIFICATION_FAILED")
                         self.user_states[user_id] = ConversationState.AGE_VERIFICATION_FAILED
                     else:
-                        log_debug("Adult age, transitioning to AWAITING_BIRTH_TIMING")
-                        self.user_states[user_id] = ConversationState.AWAITING_BIRTH_TIMING
+                        # Skip directly to USER_LED state
+                        log_debug("Adult age, transitioning directly to USER_LED")
+                        self.user_states[user_id] = ConversationState.USER_LED
                 else:
                     log_debug("Could not parse age from message")
             except Exception as e:
                 log_debug(f"Error processing age: {e}")
                 log_debug(traceback.format_exc())
         
-        elif current_state == ConversationState.AWAITING_BIRTH_TIMING:
-            not_given_birth_phrases = ['not yet', 'haven\'t given birth', 'no birth', 'still pregnant', 'expecting']
-            if any(phrase in message.lower() for phrase in not_given_birth_phrases):
-                log_debug("User has not given birth, transitioning to IN_PREGNANCY_INFO")
-                self.user_states[user_id] = ConversationState.IN_PREGNANCY_INFO
-            else:
-                log_debug("User has given birth, transitioning to EMOTIONAL_QUESTION")
-                self.user_states[user_id] = ConversationState.EMOTIONAL_QUESTION
-        
         elif current_state == ConversationState.IN_PREGNANCY_INFO:
             log_debug("Staying in IN_PREGNANCY_INFO state")
             # The state doesn't change here unless the user wants to exit
             pass
-
-        elif current_state == ConversationState.EMOTIONAL_QUESTION:
-            log_debug("User provided emotional state, transitioning to MENTAL_QUESTION state")
-            self.user_states[user_id] = ConversationState.MENTAL_QUESTION
-            
-        elif current_state == ConversationState.MENTAL_QUESTION:
-            log_debug("User provided mental state, transitioning to SLEEP_QUESTION state")
-            self.user_states[user_id] = ConversationState.SLEEP_QUESTION
-            
-        elif current_state == ConversationState.SLEEP_QUESTION:
-            log_debug("User provided sleep info, transitioning to PHYSICAL_QUESTION state")
-            self.user_states[user_id] = ConversationState.PHYSICAL_QUESTION
-            
-        elif current_state == ConversationState.PHYSICAL_QUESTION:
-            log_debug("User provided physical state, transitioning to SYMPTOMS_QUESTION state")
-            self.user_states[user_id] = ConversationState.SYMPTOMS_QUESTION
-            
-        elif current_state == ConversationState.SYMPTOMS_QUESTION:
-            log_debug("User provided symptoms, transitioning to USER_LED state")
-            self.user_states[user_id] = ConversationState.USER_LED
 
         elif current_state == ConversationState.SYMPTOMS_QUESTIONNAIRE:
             if 'exit' in message.lower() or 'back' in message.lower():
@@ -175,14 +154,22 @@ class GeminiChatbot:
                 # Stay in symptoms questionnaire state to continue the assessment
                 pass
         
-        # Check for symptoms keywords in any state to transition to symptoms questionnaire
+        # Check for keywords in any state to transition to appropriate state
         if current_state == ConversationState.USER_LED:
+            # Check for EPDS keywords
+            epds_keywords = ['epds', 'edinburgh', 'depression scale', 'screening', 'assessment', 'questionnaire', 'test']
             symptoms_keywords = ['symptoms', 'symptom', 'check symptoms', 'assessment']
-            if any(keyword in message.lower() for keyword in symptoms_keywords):
+            
+            if any(keyword in message.lower() for keyword in epds_keywords):
+                log_debug("EPDS keyword detected, transitioning to EPDS mode in JavaScript")
+                # This will be handled by JavaScript, so we keep the state as USER_LED
+                pass
+            elif any(keyword in message.lower() for keyword in symptoms_keywords):
                 log_debug("Symptoms keyword detected, transitioning to SYMPTOMS_QUESTIONNAIRE")
                 self.user_states[user_id] = ConversationState.SYMPTOMS_QUESTIONNAIRE
         
         log_debug(f"New state: {self.user_states.get(user_id)}")
+        log_debug(f"State transition: {current_state} -> {self.user_states.get(user_id)}")
 
     def get_response(self, user_id, message):
         """Get response to user message"""
@@ -391,6 +378,17 @@ Please choose a number (1-5) or type "new" to start a new conversation:"""
             
         message = message.lower()
         
+        # Check for number selections that indicate high risk
+        # Extract numbers from the message
+        number_matches = re.findall(r'\b(\d+)\b', message)
+        for num_str in number_matches:
+            try:
+                num = int(num_str)
+                if 1 <= num <= 5:  # Numbers 1-5 are high risk symptoms
+                    return "high", "I'm really concerned about how you're feeling. These symptoms are serious. You're not alone, and help is available. Please contact your healthcare provider immediately or go to the nearest emergency room. Your wellbeing is important, and these symptoms require prompt medical attention."
+            except ValueError:
+                pass
+        
         # High risk symptoms - immediate medical attention needed
         high_risk_symptoms = [
             'suicidal', 'kill myself', 'end my life', 'don\'t want to live',
@@ -440,6 +438,34 @@ Please choose a number (1-5) or type "new" to start a new conversation:"""
         message = message.lower()
         symptoms = []
         
+        # Check for number-based selections first (1, 2, 3, etc.)
+        # Extract numbers from the message
+        number_matches = re.findall(r'\b(\d+)\b', message)
+        
+        # Map numbers to high-risk symptom descriptions
+        symptom_map = {
+            1: "• ⚠️ Thoughts about harming yourself or your baby",
+            2: "• ⚠️ Hallucinations or delusions",
+            3: "• ⚠️ Complete inability to sleep even when exhausted",
+            4: "• ⚠️ Extreme mood swings or rage episodes",
+            5: "• ⚠️ Disconnection or lack of interest in baby"
+        }
+        
+        # Check for number selections
+        for num_str in number_matches:
+            try:
+                num = int(num_str)
+                if 1 <= num <= 5:  # Valid selection range for high-risk symptoms
+                    symptoms.append(symptom_map[num])
+            except ValueError:
+                pass
+                
+        # If number selections were found, return them
+        if symptoms:
+            return symptoms
+            
+        # Otherwise, continue with text-based symptom identification
+        
         # Emotional symptoms
         if any(word in message for word in ["sad", "tear", "cry", "depress", "down", "blue", "unhappy", "upset"]):
             symptoms.append("• Feelings of sadness or tearfulness")
@@ -478,11 +504,11 @@ Please choose a number (1-5) or type "new" to start a new conversation:"""
         if any(word in message for word in ["headache", "migraine", "head pain"]):
             symptoms.append("• Headaches")
         
-        # Severe symptoms
+        # Severe symptoms - use HIGH RISK tag to make them more visible
         if any(word in message for word in ["suicidal", "harm", "death", "kill", "end life", "don't want to live"]):
-            symptoms.append("• Thoughts of self-harm or suicide")
+            symptoms.append("• ⚠️ HIGH RISK: Thoughts of self-harm or suicide")
         if any(word in message for word in ["hallucination", "seeing things", "hearing voices", "delusion"]):
-            symptoms.append("• Hallucinations or delusions")
+            symptoms.append("• ⚠️ HIGH RISK: Hallucinations or delusions")
         
         # If no specific symptoms identified
         if len(symptoms) == 0:
@@ -663,21 +689,25 @@ Type "new" to start a new conversation.
         return report
 
     def get_response_for_state(self, new_state, message=None):
-        """Generate appropriate response based on the state"""
-        log_debug(f"Getting response for state: {new_state}")
+        """Get a response based on the current conversation state."""
         
+        # Common response templates
         if new_state == ConversationState.GREETING:
             return "Hi, I'm MOM, your postpartum support companion"
-        
+            
+        elif new_state == ConversationState.PERMISSION_ASK:
+            return "Is it okay if I ask you a few questions?\n\n1. Yes\n2. No"
+            
         elif new_state == ConversationState.AWAITING_AGE:
-            return "To give you the best support, may I ask your age?"
-        
+            # Check if this is coming from a "no" response to permission question
+            if message and any(word in message.lower() for word in ['no', 'nope', 'nah', '2']):
+                return "I understand. To provide the most relevant information, may I at least ask your age?"
+            else:
+                return "To give you the best support, may I ask your age?"
+            
         elif new_state == ConversationState.AGE_VERIFICATION_FAILED:
             return "I understand you're looking for help. Because you're under 18, it's a good idea to speak with a parent or healthcare provider. Could you please tell me your age?"
-        
-        elif new_state == ConversationState.AWAITING_BIRTH_TIMING:
-            return "How many weeks or days have passed since you gave birth? (If you haven't given birth yet, please let me know)"
-        
+            
         elif new_state == ConversationState.IN_PREGNANCY_INFO:
             return """What would you like to know:
 
@@ -689,125 +719,43 @@ Type "new" to start a new conversation.
 
 Please choose a number (1-5) or type "new" to start a new conversation:"""
 
-        elif new_state == ConversationState.EMOTIONAL_QUESTION:
-            # Check if user entered an invalid number
-            if message and message.isdigit() and (int(message) < 1 or int(message) > 5):
-                return "Please select a number between 1 and 5, or describe how you're feeling emotionally:\n\n1. 😊 Generally positive\n\n2. 😢 Sad or tearful\n\n3. 😰 Anxious or worried\n\n4. 😡 Irritable or angry\n\n5. 😔 Overwhelmed\n\nPlease select a number or describe how you're feeling."
-                
-            return "How have you been feeling emotionally since the birth?\n\n1. 😊 Generally positive\n\n2. 😢 Sad or tearful\n\n3. 😰 Anxious or worried\n\n4. 😡 Irritable or angry\n\n5. 😔 Overwhelmed\n\nPlease select a number or describe how you're feeling."
-
-        elif new_state == ConversationState.MENTAL_QUESTION:
-            # Provide personalized response based on emotional state
-            emotional_response = ""
-            if message:
-                message = message.lower()
-                
-                # Check if user entered an invalid number
-                if message.isdigit() and (int(message) < 1 or int(message) > 5):
-                    return "Please select a number between 1 and 5, or describe your mental state:\n\n1. 🧠 Mentally exhausted\n\n2. 🌫️ Foggy or distracted\n\n3. 🧘 Clear and okay\n\n4. 😫 Stressed or overwhelmed\n\n5. 😌 Calm and focused\n\nPlease select a number or describe your mental state."
-                    
-                if message == "2" or any(word in message for word in ["sad", "tear", "cry", "down"]):
-                    emotional_response = "I understand you're feeling sad or tearful, which is common in the postpartum period. These feelings can be part of 'baby blues' or could indicate postpartum depression. Remember that it's okay to ask for help, and these feelings don't make you a bad parent. Getting support from loved ones, joining a parent group, or talking to your healthcare provider can make a big difference. "
-                elif message == "3" or any(word in message for word in ["anx", "worry", "nervous", "stress", "tense"]):
-                    emotional_response = "Feeling anxious or worried is a normal response to the big changes that come with parenthood. Try simple breathing exercises when anxious moments arise, and consider sharing your specific worries with a healthcare provider who can offer tailored support. "
-                elif message == "4" or any(word in message for word in ["irritable", "angry", "frustrat", "annoy"]):
-                    emotional_response = "Feeling irritable or angry is common with sleep deprivation and the demands of caring for a newborn. When these feelings arise, take a brief moment for yourself if possible, practice deep breathing, and remember to be patient with yourself as you adapt to this new role. "
-                elif message == "5" or any(word in message for word in ["overwhelm", "too much", "can't cope", "burden"]):
-                    emotional_response = "It's completely understandable to feel overwhelmed with a new baby. This is a significant life change that comes with many new responsibilities. Breaking tasks into smaller steps, accepting help when offered, and focusing on just one moment at a time can make things feel more manageable. "
-                elif message == "1" or any(word in message for word in ["positive", "good", "okay", "fine", "happy"]):
-                    emotional_response = "I'm glad to hear you're feeling generally positive! It's important to continue nurturing your emotional wellbeing as you navigate this journey. "
-            
-            return emotional_response + "How have you been feeling mentally since the birth?\n\n1. 🧠 Mentally exhausted\n\n2. 🌫️ Foggy or distracted\n\n3. 🧘 Clear and okay\n\n4. 😫 Stressed or overwhelmed\n\n5. 😌 Calm and focused\n\nPlease select a number or describe your mental state."
-
-        elif new_state == ConversationState.SLEEP_QUESTION:
-            # Provide personalized response based on mental state
-            mental_response = ""
-            if message:
-                message = message.lower()
-                
-                # Check if user entered an invalid number
-                if message.isdigit() and (int(message) < 1 or int(message) > 5):
-                    return "Please select a number between 1 and 5, or describe your sleep patterns:\n\n1. 😴 Very poorly\n\n2. 😪 Interrupted frequently\n\n3. 😌 Somewhat okay\n\n4. 🛌 Getting enough rest\n\n5. 💤 Surprisingly well\n\nPlease select a number or describe your sleep patterns."
-                    
-                if message == "1" or any(word in message for word in ["exhaust", "drain", "tired"]):
-                    mental_response = "Mental exhaustion is very common for new parents. Your brain is working overtime adjusting to new responsibilities and often with less sleep. Try to take short mental breaks when possible, even just 5 minutes of mindfulness can help. Consider asking someone you trust to watch your baby so you can have a brief mental rest. "
-                elif message == "2" or any(word in message for word in ["fog", "distract", "forget", "focus", "concentrate"]):
-                    mental_response = "Many parents experience 'mom brain' or 'dad brain' - the mental fog that comes with caring for a newborn. This is normal and temporary. Writing important things down, using reminder apps, and giving yourself grace when you forget things can help during this time. "
-                elif message == "3" or any(word in message for word in ["clear", "okay", "fine", "alright"]):
-                    mental_response = "It's great that you're feeling mentally clear. Continue to protect your mental well-being by taking breaks when needed and staying connected with supportive people in your life. "
-                elif message == "4" or any(word in message for word in ["stress", "overwhelm", "too much", "burden"]):
-                    mental_response = "Feeling mentally stressed or overwhelmed is common with all the decisions and adjustments of new parenthood. Remember that perfectionism isn't required - doing your reasonable best is enough. Consider talking with a healthcare provider if the stress feels unmanageable. "
-                elif message == "5" or any(word in message for word in ["calm", "focus", "peace", "relax"]):
-                    mental_response = "I'm glad you're feeling calm and focused mentally. This is a wonderful foundation that will help you navigate the challenges of the postpartum period. "
-                
-            return mental_response + "How have you been sleeping since the birth?\n\n1. 😴 Very poorly\n\n2. 😪 Interrupted frequently\n\n3. 😌 Somewhat okay\n\n4. 🛌 Getting enough rest\n\n5. 💤 Surprisingly well\n\nPlease select a number or describe your sleep patterns."
-
-        elif new_state == ConversationState.PHYSICAL_QUESTION:
-            # Provide personalized response based on sleep patterns
-            sleep_response = ""
-            if message:
-                message = message.lower()
-                
-                # Check if user entered an invalid number
-                if message.isdigit() and (int(message) < 1 or int(message) > 5):
-                    return "Please select a number between 1 and 5, or describe your physical recovery:\n\n1. 🤕 In pain or discomfort\n\n2. 😴 Tired or exhausted\n\n3. 💪 Recovering well\n\n4. 🙁 Having complications\n\n5. 😌 Back to normal\n\nPlease select a number or describe your physical recovery."
-                    
-                if message == "1" or any(word in message for word in ["poor", "bad", "terrible", "awful", "no sleep"]):
-                    sleep_response = "I'm sorry to hear you're sleeping very poorly. Severe sleep deprivation can affect your mood and ability to function. Try to sleep when your baby sleeps, even during the day, and consider asking a partner, family member, or friend to take a night feeding so you can get a longer stretch of sleep. If sleep problems persist, please mention it to your healthcare provider as it can affect your recovery. "
-                elif message == "2" or any(word in message for word in ["interrupt", "broken", "wake up", "disturb"]):
-                    sleep_response = "Interrupted sleep is challenging but normal with a newborn. Try to create a restful bedroom environment, limit screen time before bed, and develop a consistent bedtime routine when possible. Taking shifts with a partner or support person for night feedings can help each of you get some uninterrupted rest. "
-                elif message == "3" or any(word in message for word in ["okay", "moderate", "average", "alright"]):
-                    sleep_response = "Getting somewhat okay sleep is actually an accomplishment with a new baby! Continue to prioritize sleep when you can, and remember that your sleep needs may be higher during recovery. "
-                elif message == "4" or any(word in message for word in ["enough", "sufficient", "decent", "good"]):
-                    sleep_response = "It's wonderful that you're getting enough rest. Quality sleep is so important for your physical and emotional recovery, as well as for having the energy to care for your baby. "
-                elif message == "5" or any(word in message for word in ["great", "well", "excellent", "amazing"]):
-                    sleep_response = "That's fantastic that you're sleeping surprisingly well! This will significantly help your postpartum recovery and your ability to cope with new challenges. "
-                
-            return sleep_response + "How have you been feeling physically since the birth?\n\n1. 🤕 In pain or discomfort\n\n2. 😴 Tired or exhausted\n\n3. 💪 Recovering well\n\n4. 🙁 Having complications\n\n5. 😌 Back to normal\n\nPlease select a number or describe your physical recovery."
-
         elif new_state == ConversationState.SYMPTOMS_QUESTION:
-            # Provide personalized response based on physical condition
-            physical_response = ""
-            if message:
-                message = message.lower()
-                
-                # Check if user entered an invalid number
-                if message.isdigit() and (int(message) < 1 or int(message) > 5):
-                    return "Please select a number between 1 and 5, or describe your specific symptoms or concerns in detail so I can provide better support."
-                    
-                if message == "1" or any(word in message for word in ["pain", "discomfort", "hurt", "sore", "ache"]):
-                    physical_response = "I'm sorry you're experiencing pain or discomfort. Some discomfort is normal during recovery, but persistent or severe pain should be discussed with your healthcare provider. Make sure you're not overexerting yourself, and consider using approved pain management techniques recommended by your doctor. Warm baths (if approved by your provider), gentle stretching, and proper rest can sometimes help with minor discomforts. "
-                elif message == "2" or any(word in message for word in ["tired", "exhausted", "fatigue", "no energy"]):
-                    physical_response = "Physical exhaustion is very common after giving birth and during early parenthood. Your body is recovering from pregnancy and birth while adapting to new demands. Try to prioritize nutrition with easy, healthy foods, stay hydrated, and rest whenever possible. Consider accepting help with household tasks to conserve your energy for recovery and baby care. "
-                elif message == "3" or any(word in message for word in ["recover", "healing", "getting better", "improving"]):
-                    physical_response = "It's good to hear you're recovering well physically. Continue to be patient with your body - complete recovery can take time. Remember to still follow your provider's guidelines about physical activity restrictions and gradually increase your activity level. "
-                elif message == "4" or any(word in message for word in ["complication", "problem", "issue", "concern", "worry"]):
-                    physical_response = "I'm sorry to hear you're experiencing complications. Please make sure your healthcare provider knows about these issues, as they need proper medical attention. Don't hesitate to call your provider if you notice worsening symptoms or have concerns about your recovery. "
-                elif message == "5" or any(word in message for word in ["normal", "great", "excellent", "good", "fine"]):
-                    physical_response = "It's wonderful that you're feeling back to normal physically! This is a significant achievement in your postpartum journey. Continue to maintain your physical well-being with appropriate nutrition, hydration, and gradually increasing activity as approved by your provider. "
-                
-            return physical_response + "Could you please tell me what specific symptoms or concerns you're experiencing? This will help me provide better support for your specific needs."
-
+            return self.generate_symptom_report(message or "")
+            
         elif new_state == ConversationState.USER_LED:
-            # Generate a structured symptom report
-            if message:
-                # Assess risk level
-                risk_level, risk_response = self.assess_risk_level(message)
-                log_debug(f"Risk assessment: {risk_level} risk")
-                
-                # Generate structured report using the internal method
-                return self.generate_symptom_report(message)
-            else:
-                return "You're taking an important step by seeking support. I'm here to help with your postpartum journey.\n\nDISCLAIMER: This chatbot provides informational support only and is not a substitute for professional medical advice.\n\nWhat specific aspect of your experience would you like to discuss? Type 'new' to start a new conversation."
+            # Check if we're coming from age input
+            if message and message.isdigit():
+                return """Thank you for sharing your age. Before providing relevant support, I'd like to ask some questions to see whether you're experiencing postpartum depression symptoms.
 
+Would you like to take the Edinburgh Postnatal Depression Scale (EPDS)? This validated screening tool will help determine if you might be experiencing postpartum depression.
+
+Please reply with 'yes' to begin the questionnaire, or 'no' if you'd prefer to discuss something else first."""
+            
+            # Check if user is responding to EPDS prompt
+            if message:
+                message_lower = message.lower()
+                if any(word in message_lower for word in ['yes', 'y', 'yeah', 'sure', 'ok']):
+                    return "I'll help you complete the Edinburgh Postnatal Depression Scale (EPDS) questionnaire. Please answer honestly about how you've been feeling in the past 7 days."
+                elif any(word in message_lower for word in ['no', 'n', 'nope', 'nah']):
+                    return "That's okay. If you'd like to discuss postpartum depression symptoms or concerns later, just type 'EPDS' or 'assessment' anytime. How else can I help you today?"
+            
+            # Default response for USER_LED state
+            return "I'm here to support you. To best help you, I recommend taking the Edinburgh Postnatal Depression Scale (EPDS) questionnaire to screen for postpartum depression. Type 'yes' to begin."
+            
         elif new_state == ConversationState.SYMPTOMS_QUESTIONNAIRE:
             return """I can help you assess common postpartum symptoms. Which area would you like to check?
 
-1. 😔 Emotional symptoms (mood, anxiety, etc.)
-2. 💭 Mental symptoms (concentration, memory, etc.)
-3. 💤 Sleep issues
-4. 💪 Physical recovery concerns
-5. 👥 Social or relationship changes"""
+1. Emotional symptoms (mood, anxiety, etc.)
+
+2. Mental symptoms (concentration, memory, etc.)
+
+3. Sleep issues
+
+4. Physical recovery concerns
+
+5. Social or relationship changes
+
+Please choose a number (1-5), or type 'exit' to talk about something else."""
         
         else:
             # Default response for unknown states

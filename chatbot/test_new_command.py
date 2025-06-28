@@ -1,42 +1,35 @@
 """
 Test script for the "new" command functionality.
 """
+import os
+import sys
+import time
 from chatbot import GeminiChatbot, ConversationState
 
 def main():
-    print("===== TESTING NEW COMMAND =====")
-    
-    # Create chatbot instance
+    # Initialize chatbot
+    print("Initializing chatbot...")
     chatbot = GeminiChatbot()
     
-    # Test user ID
+    # Test user
     test_user = "test_new_command"
+    print(f"Using test user: {test_user}")
     
-    # Simulate a conversation flow
-    print("\nStep 1: Initial greeting")
-    response = chatbot.get_response(test_user, "")
-    print(f"Response: {response}")
-    print(f"State: {chatbot.user_states.get(test_user)}")
-    
-    # Manually set state to simulate progression
-    print("\nStep 2: Set state to EMOTIONAL_QUESTION")
-    chatbot.user_states[test_user] = ConversationState.EMOTIONAL_QUESTION
-    chatbot.save_state(test_user)
-    print(f"State: {chatbot.user_states.get(test_user)}")
-    
-    # Get response for emotional question
-    response = chatbot.get_response_for_state(ConversationState.EMOTIONAL_QUESTION)
-    print(f"Response: {response[:50]}...")  # Show just the beginning
-    
-    print("\nStep 3: Send 'new' command")
-    response = chatbot.get_response(test_user, "new")
-    print(f"Response: {response}")
-    print(f"State: {chatbot.user_states.get(test_user)}")
-    
-    print("\nStep 4: Verify state was reset to GREETING")
+    # Step 1: Reset state
+    print("\nStep 1: Reset state")
+    chatbot.reset_state(test_user)
     print(f"Current state: {chatbot.user_states.get(test_user)}")
     
-    print("\n===== TEST COMPLETE =====")
+    # Step 2: Set state directly to USER_LED
+    print("\nStep 2: Set state to USER_LED")
+    chatbot.user_states[test_user] = ConversationState.USER_LED
+    chatbot.save_state(test_user)
+    print(f"Set state to: {chatbot.user_states.get(test_user)}")
+    
+    # Step 3: Get response for testing
+    print("\nStep 3: Get response for USER_LED state")
+    response = chatbot.get_response_for_state(ConversationState.USER_LED)
+    print(f"Response: {response}")
 
 if __name__ == "__main__":
     main() 
